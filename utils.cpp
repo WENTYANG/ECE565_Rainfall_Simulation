@@ -52,3 +52,28 @@ int read_map(vector<vector<int>>& map, const string& fileName, int n) {
   file.close();
   return 0;
 }
+
+int find_lowest_neighbour(const vector<vector<int>>& map,
+                          vector<pair<int, int>>& res, int row, int col) {
+  // TODO: Find lowest neighbour(at least lower than current point) and return
+  // their position through res.
+  return 0;
+}
+
+bool isAllAbsorbed(const vector<vector<float>>& curRainDrops,
+                   const Arguments& args) {
+  // TODO: If all drops are absorbed, return true;
+  return true;
+}
+
+void showResult(const vector<vector<float>>& absorbedRainDrop) {
+  int n = absorbedRainDrop.size();
+
+  printf("The following grid shows the number of raindrops absorbed at each point:\n");
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+      printf("%f   ", absorbedRainDrop[i][j]);
+    }
+    printf("\n");
+  }
+}
