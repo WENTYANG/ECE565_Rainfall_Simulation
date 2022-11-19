@@ -1,6 +1,10 @@
 
 #include "header.h"
 
+// order: N,S,W,E
+int neightboursRow[4] = {-1, 1, 0, 0};
+int neightboursCol[4] = {0, 0, -1, 1};
+
 int read_args(int argc, char* argv[], Arguments* args) {
   if (argc != 6) {
     printf("correct Usage: ./rainfall_seq <P> <M> <A> <N> <elevation_file>\n");
@@ -53,23 +57,64 @@ int read_map(vector<vector<int>>& map, const string& fileName, int n) {
   return 0;
 }
 
+// Find lowest neighbour(at least lower than current point) and return
+// their position through res.
 int find_lowest_neighbour(const vector<vector<int>>& map,
-                          vector<pair<int, int>>& res, int row, int col) {
-  // TODO: Find lowest neighbour(at least lower than current point) and return
-  // their position through res.
+                          vector<pair<int, int>>& res, int row, int col,
+                          const Arguments& args) {
+  int curHeight = map[row][col];
+  int x, y;
+
+  // iterate neighbours to find the lowest one
+  int minH = INT32_MAX;
+  for (int i = 0; i < 4; i++) {
+    x = row + neightboursRow[i];
+    y = col + neightboursCol[i];
+    if (x >= args.dimension || x < 0 || y >= args.dimension || y < 0) {
+      continue;
+    }
+    if(map[x][y] < curHeight && map[x][y] < minH){
+      minH = map[x][y];
+    }
+  }
+  
+  // not found
+  if(minH == INT32_MAX)
+    return 0;
+  
+  // return the lowest neighbour's position
+  for (int i = 0; i < 4; i++) {
+    x = row + neightboursRow[i];
+    y = col + neightboursCol[i];
+    if (x >= args.dimension || x < 0 || y >= args.dimension || y < 0) {
+      continue;
+    }
+    if(map[x][y] == minH){
+      res.push_back(make_pair(x,y));
+    }
+  }
+
   return 0;
 }
 
 bool isAllAbsorbed(const vector<vector<float>>& curRainDrops,
                    const Arguments& args) {
-  // TODO: If all drops are absorbed, return true;
+  int n = args.dimension;
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+      if (abs(curRainDrops[i][j] - 0) > 1e-6) return false;
+    }
+  }
+
   return true;
 }
 
 void showResult(const vector<vector<float>>& absorbedRainDrop) {
   int n = absorbedRainDrop.size();
 
-  printf("The following grid shows the number of raindrops absorbed at each point:\n");
+  printf(
+      "The following grid shows the number of raindrops absorbed at each "
+      "point:\n");
   for (int i = 0; i < n; i++) {
     for (int j = 0; j < n; j++) {
       printf("%f   ", absorbedRainDrop[i][j]);

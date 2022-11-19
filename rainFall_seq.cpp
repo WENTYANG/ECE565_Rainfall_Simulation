@@ -42,6 +42,7 @@ void rainSimulation(const vector<vector<int>>& map,
   vector<pair<int, int>> lowestNeighbours;
 
   while(1){
+    printf("timestep:%d\n", totalTimeStep);
     totalTimeStep++;
     trickleDrops.clear();
 
@@ -64,7 +65,8 @@ void rainSimulation(const vector<vector<int>>& map,
 
         // decide trickle amount and direction
         lowestNeighbours.clear();
-        find_lowest_neighbour(map, lowestNeighbours, row, col);
+        // BUG: If there is no water at this point, it should not trickle.
+        find_lowest_neighbour(map, lowestNeighbours, row, col, args);
         if (!lowestNeighbours.empty()) {
           curRainDrops[row][col]--;
         }

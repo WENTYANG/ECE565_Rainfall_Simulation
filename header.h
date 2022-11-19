@@ -32,11 +32,16 @@ typedef struct TrickleInfo {
   }
 } TrickleInfo;
 
+
+extern int neightboursRow[4];
+extern int neightboursCol[4];
+
 int read_args(int argc, char* argv[], Arguments* args);
 int check_args_seq(const Arguments* args);
 int read_map(vector<vector<int>>& map, const string& fileName, int n);
 int find_lowest_neighbour(const vector<vector<int>>& map,
-                          vector<pair<int, int>>& res, int row, int col);
+                          vector<pair<int, int>>& res, int row, int col,
+                          const Arguments& args);
 bool isAllAbsorbed(const vector<vector<float>>& curRainDrops,
                    const Arguments& args);
 void showResult(const vector<vector<float>>& absorbedRainDrop);
