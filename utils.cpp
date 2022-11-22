@@ -112,12 +112,10 @@ bool isAllAbsorbed(const vector<vector<float>>& curRainDrops,
 void showResult(const vector<vector<float>>& absorbedRainDrop) {
   int n = absorbedRainDrop.size();
 
-  printf(
-      "The following grid shows the number of raindrops absorbed at each "
-      "point:\n");
+  printf("The following grid shows the number of raindrops absorbed at each point:\n");
   for (int i = 0; i < n; i++) {
     for (int j = 0; j < n; j++) {
-      printf("%f   ", absorbedRainDrop[i][j]);
+      printf("%-5g   ", absorbedRainDrop[i][j]);
     }
     printf("\n");
   }

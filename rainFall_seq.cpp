@@ -36,24 +36,25 @@ int main(int argc, char* argv[]) {
 
 void rainSimulation(const vector<vector<int>>& map,
                     vector<vector<float>>& absorbedRainDrop,
-                    vector<vector<float>>& curRainDrops,
-                    const Arguments& args, int& totalTimeStep) {
+                    vector<vector<float>>& curRainDrops, const Arguments& args,
+                    int& totalTimeStep) {
   vector<TrickleInfo> trickleDrops;
   vector<pair<int, int>> lowestNeighbours;
+  float trickleAmount = 0;
 
-  while(1){
-    printf("timestep:%d\n", totalTimeStep);
+  while (1) {
+    // printf("timestep:%d\n", totalTimeStep);
     totalTimeStep++;
     trickleDrops.clear();
 
     for (int row = 0; row < args.dimension; row++) {
       for (int col = 0; col < args.dimension; col++) {
         // rain, add new drop
-        if(totalTimeStep <= args.timeStep){
+        if (totalTimeStep <= args.timeStep) {
           curRainDrops[row][col]++;
         }
-        
-        // drop get abosrbed (// TODO: abstract this section?)
+
+        // drop get abosrbed (//TODO: abstract this section?)
         if (curRainDrops[row][col] > 0) {
           float absRate = args.absorptionRate;
           if (curRainDrops[row][col] <= args.absorptionRate) {
@@ -64,17 +65,25 @@ void rainSimulation(const vector<vector<int>>& map,
         }
 
         // decide trickle amount and direction
-        lowestNeighbours.clear();
-        // BUG: If there is no water at this point, it should not trickle.
-        find_lowest_neighbour(map, lowestNeighbours, row, col, args);
-        if (!lowestNeighbours.empty()) {
-          curRainDrops[row][col]--;
+        if (curRainDrops[row][col] < 0 || abs(curRainDrops[row][col]) < 1e-6) {
+          continue;
         }
+        trickleAmount =
+            curRainDrops[row][col] > 1 ? 1.0 : curRainDrops[row][col];
+
+        // decide trickle direction and record
+        lowestNeighbours.clear();
+        find_lowest_neighbour(map, lowestNeighbours, row, col, args);
         for (auto& point : lowestNeighbours) {
           int r = point.first;
           int c = point.second;
           trickleDrops.push_back(
-              TrickleInfo(1.0 / lowestNeighbours.size(), r, c));
+              TrickleInfo(trickleAmount / lowestNeighbours.size(), r, c));
+        }
+
+        // drops are reduced from current point for trickling
+        if (!lowestNeighbours.empty()) {
+          curRainDrops[row][col] -= trickleAmount;
         }
       }
     }
@@ -84,9 +93,8 @@ void rainSimulation(const vector<vector<int>>& map,
       curRainDrops[it.r][it.c] += it.amount;
     }
 
-    if(totalTimeStep > args.timeStep && isAllAbsorbed(curRainDrops, args)){
+    if (totalTimeStep > args.timeStep && isAllAbsorbed(curRainDrops, args)) {
       break;
     }
   }
-  
 }
