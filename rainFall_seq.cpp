@@ -22,13 +22,13 @@ int main(int argc, char* argv[]) {
   vector<vector<float>> curRainDrops(args.dimension,
                                      vector<float>(args.dimension, 0));
   int totalTimeStep = 0;
-  time_t start, end;
-  time(&start);
+  clock_t start,end;
+  start = clock();
   rainSimulation(map, absorbedRainDrop, curRainDrops, args, totalTimeStep);
-  time(&end);
+  end = clock();
 
   // output simulation results
-  double runtime = double(end - start);
+  double runtime = (double)(end-start)/CLOCKS_PER_SEC;
   printf("Rainfall simulation completed in %d time steps\n", totalTimeStep);
   printf("Runtime = %f seconds\n", runtime);
   showResult(absorbedRainDrop);
@@ -49,7 +49,7 @@ void rainSimulation(const vector<vector<int>>& map,
 
     for (int row = 0; row < args.dimension; row++) {
       for (int col = 0; col < args.dimension; col++) {
-        // rain, add new drop
+        // rain, add new drop to each point
         if (totalTimeStep <= args.timeStep) {
           curRainDrops[row][col]++;
         }
@@ -71,7 +71,7 @@ void rainSimulation(const vector<vector<int>>& map,
         trickleAmount =
             curRainDrops[row][col] > 1 ? 1.0 : curRainDrops[row][col];
 
-        // decide trickle direction and record
+        // decide trickle direction and record it
         lowestNeighbours.clear();
         find_lowest_neighbour(map, lowestNeighbours, row, col, args);
         for (auto& point : lowestNeighbours) {
@@ -93,6 +93,7 @@ void rainSimulation(const vector<vector<int>>& map,
       curRainDrops[it.r][it.c] += it.amount;
     }
 
+    // Simulation ends
     if (totalTimeStep > args.timeStep && isAllAbsorbed(curRainDrops, args)) {
       break;
     }
