@@ -1,12 +1,13 @@
 CC = g++
 CFLAGS = -O3
-EXTRAFLAGS = -lpthread
+LIBS = -ltimer
+LIB_DIRS = -L.
 
 
 all: sequential
 
 sequential:  header.h
-	$(CC) $(CFLAGS)  -o rainFall_seq rainFall_seq.cpp utils.cpp  $(EXTRAFLAGS)
+	$(CC) $(CFLAGS) -o rainFall_seq rainFall_seq.cpp utils.cpp $(LIB_DIRS) $(LIBS)
 
 .PHONY:
 	clean

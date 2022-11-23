@@ -46,4 +46,11 @@ int find_lowest_neighbour(const vector<vector<int>>& map,
 bool isAllAbsorbed(const vector<vector<float>>& curRainDrops,
                    const Arguments& args);
 void showResult(const vector<vector<float>>& absorbedRainDrop);
+
+// timerlib
+extern "C" {
+void Timer_Start(char*);
+void Timer_Stop(char*);
+void Timer_Print();
+}
 #endif
