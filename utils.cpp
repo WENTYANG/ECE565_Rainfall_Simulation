@@ -1,5 +1,6 @@
 
 #include "header.h"
+#define PROFILE
 
 // order: N,S,W,E
 int neightboursRow[4] = {-1, 1, 0, 0};
@@ -73,15 +74,14 @@ int find_lowest_neighbour(const vector<vector<int>>& map,
     if (x >= args.dimension || x < 0 || y >= args.dimension || y < 0) {
       continue;
     }
-    if(map[x][y] < curHeight && map[x][y] < minH){
+    if (map[x][y] < curHeight && map[x][y] < minH) {
       minH = map[x][y];
     }
   }
-  
+
   // not found
-  if(minH == INT32_MAX)
-    return 0;
-  
+  if (minH == INT32_MAX) return 0;
+
   // return the lowest neighbour's position
   for (int i = 0; i < 4; i++) {
     x = row + neightboursRow[i];
@@ -89,8 +89,8 @@ int find_lowest_neighbour(const vector<vector<int>>& map,
     if (x >= args.dimension || x < 0 || y >= args.dimension || y < 0) {
       continue;
     }
-    if(map[x][y] == minH){
-      res.push_back(make_pair(x,y));
+    if (map[x][y] == minH) {
+      res.push_back(make_pair(x, y));
     }
   }
 
@@ -99,13 +99,23 @@ int find_lowest_neighbour(const vector<vector<int>>& map,
 
 bool isAllAbsorbed(const vector<vector<float>>& curRainDrops,
                    const Arguments& args) {
+#ifdef PROFILE
+  Timer_Start("isAllAbsorbed");
+#endif
   int n = args.dimension;
   for (int i = 0; i < n; i++) {
     for (int j = 0; j < n; j++) {
-      if (abs(curRainDrops[i][j] - 0) > 1e-6) return false;
+      if (abs(curRainDrops[i][j] - 0) > 1e-6) {
+#ifdef PROFILE
+        Timer_Stop("isAllAbsorbed");
+#endif
+        return false;
+      }
     }
   }
-
+#ifdef PROFILE
+  Timer_Stop("isAllAbsorbed");
+#endif
   return true;
 }
 
