@@ -121,10 +121,10 @@ void rainSimulation(const vector<vector<int>>& map,
       }
     }
 
-    // Add trickle drops to each point
 #ifdef PROFILE
     Timer_Start("Add trickle drops");
 #endif
+    // Add trickle drops to each point
     for (auto& it : trickleDrops) {
       curRainDrops[it.r][it.c] += it.amount;
     }
