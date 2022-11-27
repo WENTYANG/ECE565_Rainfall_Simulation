@@ -1,6 +1,6 @@
 
 #include "header.h"
-#define PROFILE
+
 
 void rainSimulation(const vector<vector<int>>& map,
                     vector<vector<float>>& absorbedRainDrop,
@@ -85,7 +85,6 @@ void rainSimulation(const vector<vector<int>>& map,
 #ifdef PROFILE
         Timer_Stop("Drops absorbed");
 #endif
-
         // decide trickle amount
         if (curRainDrops[row][col] < 0 || abs(curRainDrops[row][col]) < 1e-6) {
           continue;

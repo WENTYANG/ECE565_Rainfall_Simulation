@@ -53,4 +53,8 @@ void Timer_Start(char*);
 void Timer_Stop(char*);
 void Timer_Print();
 }
+
+// #define PROFILE
+
+
 #endif

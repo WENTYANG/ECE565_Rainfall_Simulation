@@ -1,6 +1,6 @@
 
 #include "header.h"
-#define PROFILE
+
 
 // order: N,S,W,E
 int neightboursRow[4] = {-1, 1, 0, 0};
