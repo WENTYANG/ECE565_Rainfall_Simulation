@@ -1,6 +1,6 @@
-1. 开始先统计每个点周围的lowestNeighbours (hash_map形式存储？) 并行计算，按点分
+1. 开始先统计每个点周围的lowestNeighbours (hash_map形式存储？) 并行计算，按点分 ✔
 2. timeStep内并行给每个点加一个drop  
-3. 并行计算这个点对应其他点的trickleAmount，每个点自减trickAmount （map形式存储）（multithread + join）
+3. 并行 absorbed 和 计算这个点对应其他点的trickleAmount，每个点自减trickAmount （map形式存储）（multithread + join）
 4. 各个点加上流向自己的trickleAmount 
 5. 计算ending condition
 

@@ -11,9 +11,9 @@ sequential:  header.h
 	$(CC) $(CFLAGS) -o rainFall_seq rainFall_seq.cpp utils.cpp ${SEQUENTIAL}
 
 parallel: header.h
-	$(CC) $(CFLAGS) -o rainFall_para rainFall_para.cpp utils.cpp  ${PARALLEL}
+	$(CC) $(CFLAGS) -o rainFall_para rainFall_para.cpp utils.cpp  ${PARALLEL} -ggdb
 
 .PHONY:
 	clean
 clean:
-	rm -rf *.o rainFall_seq, rainFall_para  
+	rm -rf *.o rainFall_seq rainFall_para  

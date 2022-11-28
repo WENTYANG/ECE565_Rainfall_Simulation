@@ -18,7 +18,7 @@
 
 using namespace std;
 
-// #define PROFILE  // only used for rainFall_seq profiling
+// #define PROFILE
 // #define PARALLEL  
 // #define SEQUENTIAL
 

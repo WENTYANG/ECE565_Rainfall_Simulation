@@ -147,7 +147,7 @@ void find_lowest_neighbour_for_thread(
     unordered_map<int, vector<pair<int, int>>>& lowestNeighbours) {
   int row, col;
   vector<pair<int, int>> res;
-  for (int p = startIndex; p < pointNum; p++) {
+  for (int p = startIndex; p < startIndex + pointNum; p++) {
     row = p / args.dimension;
     col = p % args.dimension;
     res.clear();
@@ -162,3 +162,17 @@ void find_lowest_neighbour_for_thread(
   cv.notify_all();
 }
 #endif
+
+/*------------------------TEST FUNTIONS----------------------*/
+void print_lowestNeighbours(
+    const unordered_map<int, vector<pair<int, int>>>& lowestNeighbours,
+    const Arguments& args) {
+  for (auto item : lowestNeighbours) {
+    printf("[%d][%d]: ", item.first / args.dimension,
+           item.first % args.dimension);
+    for (auto point : item.second) {
+      printf("(%d, %d) ", point.first, point.second);
+    }
+    printf("\n");
+  }
+}
