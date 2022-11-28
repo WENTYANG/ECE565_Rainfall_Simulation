@@ -20,7 +20,7 @@ echo "running ./${PROGRAM_NAME} for different parameters"
 ./${PROGRAM_NAME} ${THREAD_NUM} 30 0.25 128 ${INPUT_FILE_PATH}/sample_128x128.in >  ${OUTPUT_FILE_PATH}/sample_128x128.out 
 ./${PROGRAM_NAME} ${THREAD_NUM} 30 0.75 512 ${INPUT_FILE_PATH}/sample_512x512.in >  ${OUTPUT_FILE_PATH}/sample_512x512.out 
 ./${PROGRAM_NAME} ${THREAD_NUM} 35 0.5 2048 ${INPUT_FILE_PATH}/sample_2048x2048.in >  ${OUTPUT_FILE_PATH}/sample_2048x2048.out
-#./${PROGRAM_NAME} ${THREAD_NUM} 50 0.5 4096 ${INPUT_FILE_PATH}/measurement_4096x4096.in >  ${OUTPUT_FILE_PATH}/measurement_4096x4096.out
+./${PROGRAM_NAME} ${THREAD_NUM} 50 0.5 4096 ${INPUT_FILE_PATH}/measurement_4096x4096.in >  ${OUTPUT_FILE_PATH}/measurement_4096x4096.out
 
 # used for single test
 # ./rainFall_seq 0 30 0.25 128 ./test_file/sample_128x128.in > ./output_file/sample_128x128.out
@@ -31,7 +31,7 @@ echo "running ./${PROGRAM_NAME} for different parameters"
 echo "begin checing results"
 FILE_NAME=( "sample_4x4.out " "sample_16x16.out" "sample_32x32.out" "sample_128x128.out" "sample_512x512.out" "sample_2048x2048.out" "measurement_4096x4096.out" )
 DIMENSION=( "4" "16" "32" "128" "512" "2048" "4096" )
-len=${#FILE_NAME[@]}-1  # ignore the last test
+len=${#FILE_NAME[@]}  # ignore the last test
 
 for (( i=0; i<$len; i++ ))
 do

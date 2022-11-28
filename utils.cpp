@@ -1,7 +1,6 @@
 
 #include "header.h"
 
-
 // order: N,S,W,E
 int neightboursRow[4] = {-1, 1, 0, 0};
 int neightboursCol[4] = {0, 0, -1, 1};
@@ -20,16 +19,23 @@ int read_args(int argc, char* argv[], Arguments* args) {
   return 0;
 }
 
-int check_args_seq(const Arguments* args) {
+int check_args(const Arguments* args) {
   assert(args->nThreads >= 0);
   assert(args->timeStep > 0);
   assert(args->absorptionRate > 0);
   assert(args->dimension > 0);
   assert(args->fileName.empty() == false);
 
-  if (args->nThreads != 0) {
+#ifdef SEQUENTIAL
+  if (args->nThreads == 0) {
     printf("nThreads arg will be ignored.");
   }
+#endif
+#ifdef PARALLEL
+  if (args->nThreads == 0) {
+    printf("nThreads arg should not be 0.");
+  }
+#endif
   return 0;
 }
 
@@ -97,32 +103,34 @@ int find_lowest_neighbour(const vector<vector<int>>& map,
   return 0;
 }
 
-bool isAllAbsorbed(const vector<vector<float>>& curRainDrops,
-                   const Arguments& args) {
+bool is_all_absorbed(const vector<vector<float>>& curRainDrops,
+                     const Arguments& args) {
 #ifdef PROFILE
-  Timer_Start("isAllAbsorbed");
+  Timer_Start("is_all_absorbed");
 #endif
   int n = args.dimension;
   for (int i = 0; i < n; i++) {
     for (int j = 0; j < n; j++) {
       if (abs(curRainDrops[i][j] - 0) > 1e-6) {
 #ifdef PROFILE
-        Timer_Stop("isAllAbsorbed");
+        Timer_Stop("is_all_absorbed");
 #endif
         return false;
       }
     }
   }
 #ifdef PROFILE
-  Timer_Stop("isAllAbsorbed");
+  Timer_Stop("is_all_absorbed");
 #endif
   return true;
 }
 
-void showResult(const vector<vector<float>>& absorbedRainDrop) {
+void show_results(const vector<vector<float>>& absorbedRainDrop) {
   int n = absorbedRainDrop.size();
 
-  printf("The following grid shows the number of raindrops absorbed at each point:\n");
+  printf(
+      "The following grid shows the number of raindrops absorbed at each "
+      "point:\n");
   for (int i = 0; i < n; i++) {
     for (int j = 0; j < n; j++) {
       printf("%-5g   ", absorbedRainDrop[i][j]);
@@ -130,3 +138,27 @@ void showResult(const vector<vector<float>>& absorbedRainDrop) {
     printf("\n");
   }
 }
+
+/*------------------------PARALLEL FUNTIONS----------------------*/
+#ifdef PARALLEL
+void find_lowest_neighbour_for_thread(
+    const vector<vector<int>>& map, int startIndex, int pointNum,
+    const Arguments& args,
+    unordered_map<int, vector<pair<int, int>>>& lowestNeighbours) {
+  int row, col;
+  vector<pair<int, int>> res;
+  for (int p = startIndex; p < pointNum; p++) {
+    row = p / args.dimension;
+    col = p % args.dimension;
+    res.clear();
+    find_lowest_neighbour(map, res, row, col, args);
+    if (!res.empty()) {
+      mtx.lock();
+      lowestNeighbours[p] = res;
+      mtx.unlock();
+    }
+  }
+  done++;
+  cv.notify_all();
+}
+#endif

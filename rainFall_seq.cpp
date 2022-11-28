@@ -11,7 +11,7 @@ int main(int argc, char* argv[]) {
   // read input parameters.
   Arguments args;
   read_args(argc, argv, &args);
-  check_args_seq(&args);
+  check_args(&args);
 
 // read elevation_file into array
 #ifdef PROFILE
@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
   double runtime = (double)(end - start) / CLOCKS_PER_SEC;
   printf("Rainfall simulation completed in %d time steps\n", totalTimeStep);
   printf("Runtime = %f seconds\n", runtime);
-  showResult(absorbedRainDrop);
+  show_results(absorbedRainDrop);
 #ifdef PROFILE
   Timer_Print();
 #endif
@@ -133,7 +133,7 @@ void rainSimulation(const vector<vector<int>>& map,
 #endif
 
     // Simulation ends
-    if (totalTimeStep > args.timeStep && isAllAbsorbed(curRainDrops, args)) {
+    if (totalTimeStep > args.timeStep && is_all_absorbed(curRainDrops, args)) {
       break;
     }
   }
