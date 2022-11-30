@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
   // simulation
   vector<vector<float>> absorbedRainDrop(args.dimension,
                                          vector<float>(args.dimension, 0));
-  int totalTimeStep;
+  int totalTimeStep = 0;
   rain_simulation(map, lowestNeighbours, absorbedRainDrop, args, totalTimeStep);
 
   // output simulation results
@@ -108,13 +108,13 @@ void rain_simulation(
               neighRow, neighCol));
         }
 
-        if(!lowestNeighbours[row * args.dimension + col].empty()){
+        if (!lowestNeighbours[row * args.dimension + col].empty()) {
           curRainDrops[row][col] -= trickleAmount;
         }
       }
     }
     // TODO: Add trickle amount
-    for(auto& trickle:trickleDrops){
+    for (auto& trickle : trickleDrops) {
       curRainDrops[trickle.r][trickle.c] += trickle.amount;
     }
 
