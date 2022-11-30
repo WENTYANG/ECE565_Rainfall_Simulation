@@ -5,6 +5,16 @@
 std::mutex mtx;
 std::condition_variable cv;
 atomic<int> done(0);
+int totalPoints;
+int numPerTask;
+
+void barrier(const int nThreads) {
+  std::unique_lock<std::mutex> lk(mtx);  // mtx locks here
+  while (done.load() != nThreads) {
+    cv.wait(lk);
+  }
+  // unlock automatically when lk destructs.
+}
 
 void rain_simulation(
     const vector<vector<int>>& map,
@@ -29,8 +39,22 @@ int main(int argc, char* argv[]) {
   // calculate lowestNeighbours in parallel
   unordered_map<int, vector<pair<int, int>>>
       lowestNeighbours;  // record the lowest neighbours of each point
-  int totalPoints = args.dimension * args.dimension;
-  int numPerTask = totalPoints / args.nThreads;
+  totalPoints = args.dimension * args.dimension;
+  numPerTask = totalPoints / args.nThreads;
+
+#ifdef SERIAL_NEIGHBOUR
+  for (int p = 0; p < totalPoints; p++) {
+    int row = p / args.dimension;
+    int col = p % args.dimension;
+    vector<pair<int, int>> res;
+    find_lowest_neighbour(map, res, row, col, args);
+    if (!res.empty()) {
+      lowestNeighbours[p] = res;
+    }
+  }
+#endif
+
+#ifndef SERIAL_NEIGHBOUR
   done.store(0);
   for (int i = 0; i < args.nThreads; i++) {
     int startIndex = i * numPerTask;
@@ -38,14 +62,8 @@ int main(int argc, char* argv[]) {
              numPerTask, std::ref(args), std::ref(lowestNeighbours));
     t.detach();
   }
-  // add barrier manually
-  {
-    std::unique_lock<std::mutex> lk(mtx);  // mtx locks here
-    while (done.load() != args.nThreads) {
-      cv.wait(lk);
-    }
-    // unlock automatically when lk destructs.
-  }
+  barrier(args.nThreads);
+#endif
 
   // simulation
   vector<vector<float>> absorbedRainDrop(args.dimension,
@@ -71,17 +89,38 @@ void rain_simulation(
                                      vector<float>(args.dimension, 0));
   while (1) {
     totalTimeStep++;
+#ifdef SERIAL_CALC_TRICKLE
     vector<TrickleInfo> trickleDrops;
+#endif
+#ifndef SERIAL_CALC_TRICKLE
+    vector<TrickleInfo> trickleDrops[args.nThreads];
+#endif
     if (totalTimeStep <= args.timeStep) {
       // TODO: rain drop parallel
-      for (int row = 0; row < args.dimension; row++) {
-        for (int col = 0; col < args.dimension; col++) {
-          curRainDrops[row][col]++;
-        }
+
+#ifdef SERIAL_ADDDROP
+      // for (int row = 0; row < args.dimension; row++) {
+      //   for (int col = 0; col < args.dimension; col++) {
+      //     curRainDrops[row][col]++;
+      //   }
+      // }
+#endif
+
+#ifndef SERIAL_ADDDROP
+      done.store(0);
+      for (int i = 0; i < args.nThreads; i++) {
+        int startIndex = i * numPerTask;
+        thread t(add_drop_for_thread, std::ref(curRainDrops), startIndex,
+                 numPerTask, i, std::ref(args));
+        t.detach();
       }
+      barrier(args.nThreads);
     }
+#endif
 
     // TODO: rain drop absorbs and calculate trickleAmount in parallel
+
+#ifdef SERIAL_ABSORB
     for (int row = 0; row < args.dimension; row++) {
       for (int col = 0; col < args.dimension; col++) {
         if (curRainDrops[row][col] > 0) {
@@ -92,7 +131,35 @@ void rain_simulation(
           curRainDrops[row][col] -= absRate;
           absorbedRainDrop[row][col] += absRate;
         }
+      }
+    }
+#endif
 
+#ifndef SERIAL_ABSORB
+    done.store(0);
+    for (int i = 0; i < args.nThreads; i++) {
+      int startIndex = i * numPerTask;
+#ifdef SERIAL_CALC_TRICKLE
+      thread t(absorb_and_calc_trickle_for_thread, std::ref(curRainDrops),
+               std::ref(absorbedRainDrop), std::ref(lowestNeighbours),
+               std::ref(trickleDrops), i, startIndex, numPerTask,
+               std::ref(args));
+#endif
+#ifndef SERIAL_CALC_TRICKLE
+      thread t(absorb_and_calc_trickle_for_thread, std::ref(curRainDrops),
+               std::ref(absorbedRainDrop), std::ref(lowestNeighbours),
+               std::ref(trickleDrops[i]), i, startIndex, numPerTask,
+               std::ref(args));
+#endif
+
+      t.detach();
+    }
+    barrier(args.nThreads);
+#endif
+
+#ifdef SERIAL_CALC_TRICKLE
+    for (int row = 0; row < args.dimension; row++) {
+      for (int col = 0; col < args.dimension; col++) {
         if (curRainDrops[row][col] < 0 || abs(curRainDrops[row][col]) < 1e-6) {
           continue;
         }
@@ -113,10 +180,22 @@ void rain_simulation(
         }
       }
     }
+#endif
+
     // TODO: Add trickle amount
+#ifdef SERIAL_CALC_TRICKLE
     for (auto& trickle : trickleDrops) {
       curRainDrops[trickle.r][trickle.c] += trickle.amount;
     }
+#endif
+
+#ifndef SERIAL_CALC_TRICKLE
+    for (int i = 0; i < args.nThreads; i++) {
+      for (auto& trickle : trickleDrops[i]) {
+        curRainDrops[trickle.r][trickle.c] += trickle.amount;
+      }
+    }
+#endif
 
     // TODO: Simulation ending condition
     if (totalTimeStep > args.timeStep && is_all_absorbed(curRainDrops, args)) {
