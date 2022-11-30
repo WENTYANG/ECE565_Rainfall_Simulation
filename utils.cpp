@@ -67,7 +67,9 @@ int read_map(vector<vector<int>>& map, const string& fileName, int n) {
 // Find lowest neighbour(at least lower than current point) and return
 // their position through res.
 int find_lowest_neighbour(const vector<vector<int>>& map,
-                          vector<pair<int, int>>& res, int row, int col,
+                          vector<pair<int, int>>& res,
+                          int row,
+                          int col,
                           const Arguments& args) {
   int curHeight = map[row][col];
   int x, y;
@@ -86,7 +88,8 @@ int find_lowest_neighbour(const vector<vector<int>>& map,
   }
 
   // not found
-  if (minH == INT32_MAX) return 0;
+  if (minH == INT32_MAX)
+    return 0;
 
   // return the lowest neighbour's position
   for (int i = 0; i < 4; i++) {
@@ -142,12 +145,14 @@ void show_results(const vector<vector<float>>& absorbedRainDrop) {
 /*------------------------PARALLEL FUNTIONS----------------------*/
 #ifdef PARALLEL
 void find_lowest_neighbour_for_thread(
-    const vector<vector<int>>& map, int startIndex, int pointNum,
+    const vector<vector<int>>& map,
+    int startIndex,
+    int numPoints,
     const Arguments& args,
     unordered_map<int, vector<pair<int, int>>>& lowestNeighbours) {
   int row, col;
   vector<pair<int, int>> res;
-  for (int p = startIndex; p < startIndex + pointNum; p++) {
+  for (int p = startIndex; p < startIndex + numPoints; p++) {
     row = p / args.dimension;
     col = p % args.dimension;
     res.clear();
@@ -160,6 +165,94 @@ void find_lowest_neighbour_for_thread(
   }
   done++;
   cv.notify_all();
+}
+
+void add_drop_for_thread(vector<vector<float>>& curRainDrops,
+                         const int startIndex,
+                         const int numPoints,
+                         const int threadId,
+                         const Arguments& args) {
+  int row, col;
+  for (int p = startIndex; p < startIndex + numPoints; p++) {
+    row = p / args.dimension;
+    col = p % args.dimension;
+    add_drop_for_single_point(curRainDrops, row, col);
+  }
+  mtx.lock();
+  done++;
+  mtx.unlock();
+  cv.notify_all();
+}
+
+void absorb_and_calc_trickle_for_thread(
+    vector<vector<float>>& curRainDrops,
+    vector<vector<float>>& absorbedRainDrop,
+    unordered_map<int, vector<pair<int, int>>>& lowestNeighbours,
+    vector<TrickleInfo>& trickleDrops,
+    const int threadId,
+    const int startIndex,
+    const int numPoints,
+    const Arguments& args) {
+  int row, col;
+  for (int p = startIndex; p < startIndex + numPoints; p++) {
+    row = p / args.dimension;
+    col = p % args.dimension;
+    if (curRainDrops[row][col] > args.absorptionRate) {
+      // Absorb
+      absorb_for_single_point(curRainDrops, absorbedRainDrop,
+                              args.absorptionRate, row, col);
+// Trickle
+#ifndef SERIAL_CALC_TRICKLE
+      calc_trickle_for_single_point(curRainDrops, lowestNeighbours,
+                                    trickleDrops, threadId, row, col, args);
+#endif
+    } else if (abs(curRainDrops[row][col]) > 1e-6) {
+      // Absorb
+      absorb_for_single_point(curRainDrops, absorbedRainDrop,
+                              curRainDrops[row][col], row, col);
+    }
+  }
+  mtx.lock();
+  done++;
+  mtx.unlock();
+  cv.notify_all();
+}
+
+void calc_trickle_for_single_point(
+    vector<vector<float>>& curRainDrops,
+    unordered_map<int, vector<pair<int, int>>>& lowestNeighbours,
+    vector<TrickleInfo>& trickleDrops,
+    const int threadId,
+    int row,
+    int col,
+    const Arguments& args) {
+  float trickleAmount =
+      curRainDrops[row][col] > 1 ? 1.0 : curRainDrops[row][col];
+  int index = row * args.dimension + col;
+  for (auto& neigh : lowestNeighbours[index]) {
+    int neighRow = neigh.first;
+    int neighCol = neigh.second;
+    trickleDrops.push_back(TrickleInfo(
+        trickleAmount / lowestNeighbours[index].size(), neighRow, neighCol));
+  }
+  if (!lowestNeighbours[row * args.dimension + col].empty()) {
+    curRainDrops[row][col] -= trickleAmount;
+  }
+}
+
+void absorb_for_single_point(vector<vector<float>>& curRainDrops,
+                             vector<vector<float>>& absorbedRainDrop,
+                             const float absRate,
+                             const int row,
+                             const int col) {
+  curRainDrops[row][col] -= absRate;
+  absorbedRainDrop[row][col] += absRate;
+}
+
+void add_drop_for_single_point(vector<vector<float>>& curRainDrops,
+                               int row,
+                               int col) {
+  ++curRainDrops[row][col];
 }
 #endif
 
