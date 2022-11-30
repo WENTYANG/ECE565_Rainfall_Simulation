@@ -62,6 +62,7 @@ void rainSimulation(const vector<vector<int>>& map,
 #ifdef PROFILE
         Timer_Start("Add rain drops");
 #endif
+
         // rain, add new drop to each point
         if (totalTimeStep <= args.timeStep) {
           curRainDrops[row][col]++;
