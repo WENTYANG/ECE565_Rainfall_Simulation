@@ -33,8 +33,7 @@ int main(int argc, char* argv[]) {
   vector<vector<int>> map(args.dimension, vector<int>(args.dimension, 0));
   read_map(map, args.fileName, args.dimension);
 
-  clock_t start, end;
-  start = clock();
+  auto start = chrono::system_clock::now();
 
   // calculate lowestNeighbours in parallel
   unordered_map<int, vector<pair<int, int>>>
@@ -72,11 +71,12 @@ int main(int argc, char* argv[]) {
   rain_simulation(map, lowestNeighbours, absorbedRainDrop, args, totalTimeStep);
 
   // output simulation results
-  end = clock();
-  double runtime = (double)(end - start) / CLOCKS_PER_SEC;
-  printf("Rainfall simulation completed in %d time steps\n", totalTimeStep);
-  printf("Runtime = %f seconds\n", runtime);
-  show_results(absorbedRainDrop);
+  auto end = chrono::system_clock::now();
+   std::chrono::duration<double> runtime = end - start;
+   cout << "Rainfall simulation completed in " << totalTimeStep << " time steps"
+        << endl;
+   cout << "Runtime = " << runtime.count() << " seconds" << endl;
+   show_results(absorbedRainDrop);
 }
 
 void rain_simulation(
@@ -100,14 +100,13 @@ void rain_simulation(
     }
 #endif
     if (totalTimeStep <= args.timeStep) {
-      // TODO: rain drop parallel
 
 #ifdef SERIAL_ADDDROP
-      // for (int row = 0; row < args.dimension; row++) {
-      //   for (int col = 0; col < args.dimension; col++) {
-      //     curRainDrops[row][col]++;
-      //   }
-      // }
+      for (int row = 0; row < args.dimension; row++) {
+        for (int col = 0; col < args.dimension; col++) {
+          curRainDrops[row][col]++;
+        }
+      }
 #endif
 
 #ifndef SERIAL_ADDDROP
@@ -121,8 +120,6 @@ void rain_simulation(
       barrier(args.nThreads);
     }
 #endif
-
-    // TODO: rain drop absorbs and calculate trickleAmount in parallel
 
 #ifdef SERIAL_ABSORB
     for (int row = 0; row < args.dimension; row++) {
@@ -186,7 +183,6 @@ void rain_simulation(
     }
 #endif
 
-    // TODO: Add trickle amount
 #ifdef SERIAL_CALC_TRICKLE
     for (auto& trickle : trickleDrops) {
       curRainDrops[trickle.r][trickle.c] += trickle.amount;
@@ -201,7 +197,7 @@ void rain_simulation(
     }
 #endif
 
-    // TODO: Simulation ending condition
+    // Simulation ending condition
     if (totalTimeStep > args.timeStep && is_all_absorbed(curRainDrops, args)) {
       break;
     }
