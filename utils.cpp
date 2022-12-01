@@ -187,8 +187,8 @@ void add_drop_for_thread(vector<vector<float>>& curRainDrops,
 void absorb_and_calc_trickle_for_thread(
     vector<vector<float>>& curRainDrops,
     vector<vector<float>>& absorbedRainDrop,
-    unordered_map<int, vector<pair<int, int>>>& lowestNeighbours,
-    vector<TrickleInfo>& trickleDrops,
+    const unordered_map<int, vector<pair<int, int>>>& lowestNeighbours,
+    vector<TrickleInfo>*& trickleDrops,
     const int threadId,
     const int startIndex,
     const int numPoints,
@@ -220,8 +220,8 @@ void absorb_and_calc_trickle_for_thread(
 
 void calc_trickle_for_single_point(
     vector<vector<float>>& curRainDrops,
-    unordered_map<int, vector<pair<int, int>>>& lowestNeighbours,
-    vector<TrickleInfo>& trickleDrops,
+    const unordered_map<int, vector<pair<int, int>>>& lowestNeighbours,
+    vector<TrickleInfo>*& trickleDrops,
     const int threadId,
     int row,
     int col,
@@ -229,14 +229,15 @@ void calc_trickle_for_single_point(
   float trickleAmount =
       curRainDrops[row][col] > 1 ? 1.0 : curRainDrops[row][col];
   int index = row * args.dimension + col;
-  for (auto& neigh : lowestNeighbours[index]) {
-    int neighRow = neigh.first;
-    int neighCol = neigh.second;
-    trickleDrops.push_back(TrickleInfo(
-        trickleAmount / lowestNeighbours[index].size(), neighRow, neighCol));
-  }
-  if (!lowestNeighbours[row * args.dimension + col].empty()) {
+  if (lowestNeighbours.find(index) != lowestNeighbours.end()) {
     curRainDrops[row][col] -= trickleAmount;
+    for (auto& neigh : lowestNeighbours.find(index)->second) {
+      int neighRow = neigh.first;
+      int neighCol = neigh.second;
+      trickleDrops->push_back(TrickleInfo(
+          trickleAmount / lowestNeighbours.find(index)->second.size(), neighRow,
+          neighCol));
+    }
   }
 }
 

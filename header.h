@@ -25,7 +25,7 @@ using namespace std;
 // #define SERIAL_NEIGHBOUR
 // #define SERIAL_ADDDROP
 // #define SERIAL_ABSORB
-#define SERIAL_CALC_TRICKLE
+// #define SERIAL_CALC_TRICKLE
 
 typedef struct Arguments {
   int nThreads;
@@ -92,30 +92,39 @@ void add_drop_for_thread(vector<vector<float>>& curRainDrops,
                          const int threadId,
                          const Arguments& args);
 
+#ifdef SERIAL_CALC_TRICKLE
+typedef vector<TrickleInfo>& syncVecType;
+#endif
+#ifndef SERIAL_CALC_TRICKLE
+    typedef vector<TrickleInfo>*& syncVecType;
+#endif
+
+#ifndef SERIAL_CALC_TRICKLE
 void absorb_and_calc_trickle_for_thread(
     vector<vector<float>>& curRainDrops,
     vector<vector<float>>& absorbedRainDrop,
-    unordered_map<int, vector<pair<int, int>>>& lowestNeighbours,
-    vector<TrickleInfo>& trickleDrops,
+    const unordered_map<int, vector<pair<int, int>>>& lowestNeighbours,
+    syncVecType trickleDrops,
     const int threadId,
     const int startIndex,
     const int numPoints,
     const Arguments& args);
+
+void calc_trickle_for_single_point(
+    vector<vector<float>>& curRainDrops,
+    const unordered_map<int, vector<pair<int, int>>>& lowestNeighbours,
+    syncVecType trickleDrops,
+    const int threadId,
+    int row,
+    int col,
+    const Arguments& args);
+#endif
 
 void absorb_for_single_point(vector<vector<float>>& curRainDrops,
                              vector<vector<float>>& absorbedRainDrop,
                              const float absRate,
                              const int row,
                              const int col);
-
-void calc_trickle_for_single_point(
-    vector<vector<float>>& curRainDrops,
-    unordered_map<int, vector<pair<int, int>>>& lowestNeighbours,
-    vector<TrickleInfo>& trickleDrops,
-    const int threadId,
-    int row,
-    int col,
-    const Arguments& args);
 
 void add_drop_for_single_point(vector<vector<float>>& curRainDrops,
                                int row,
