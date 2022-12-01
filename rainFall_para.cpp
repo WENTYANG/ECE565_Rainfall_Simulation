@@ -89,11 +89,16 @@ void rain_simulation(
                                      vector<float>(args.dimension, 0));
   while (1) {
     totalTimeStep++;
+    printf("%d", totalTimeStep);
 #ifdef SERIAL_CALC_TRICKLE
     vector<TrickleInfo> trickleDrops;
 #endif
 #ifndef SERIAL_CALC_TRICKLE
-    vector<TrickleInfo> trickleDrops[args.nThreads];
+    vector<TrickleInfo>* trickleDrops[args.nThreads];
+    for (int i = 0; i < args.nThreads; i++){
+      trickleDrops[i] = new vector<TrickleInfo>();
+      // trickleDrops[i]->reserve(numPerTask*sizeof(TrickleInfo)*4);
+    }
 #endif
     if (totalTimeStep <= args.timeStep) {
       // TODO: rain drop parallel
@@ -191,7 +196,7 @@ void rain_simulation(
 
 #ifndef SERIAL_CALC_TRICKLE
     for (int i = 0; i < args.nThreads; i++) {
-      for (auto& trickle : trickleDrops[i]) {
+      for (auto& trickle : *trickleDrops[i]) {
         curRainDrops[trickle.r][trickle.c] += trickle.amount;
       }
     }
