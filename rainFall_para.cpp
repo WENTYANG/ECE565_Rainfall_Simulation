@@ -89,7 +89,6 @@ void rain_simulation(
                                      vector<float>(args.dimension, 0));
   while (1) {
     totalTimeStep++;
-    printf("%d", totalTimeStep);
 #ifdef SERIAL_CALC_TRICKLE
     vector<TrickleInfo> trickleDrops;
 #endif
