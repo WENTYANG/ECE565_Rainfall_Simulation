@@ -5,13 +5,13 @@ SEQUENTIAL = -DSEQUENTIAL -L. -ltimer
 PROFILE = -DPROFILE
 
 
-all: sequential parallel
+all: rainfall_seq rainfall_pt
 
-sequential:  header.h
-	$(CC) $(CFLAGS) -o rainFall_seq rainFall_seq.cpp utils.cpp ${SEQUENTIAL}
+rainfall_seq:  header.h
+	$(CC) $(CFLAGS) -o rainfall_seq rainFall_seq.cpp utils.cpp ${SEQUENTIAL} ${PROFILE}
 
-parallel: header.h
-	$(CC) $(CFLAGS) -o rainFall_para rainFall_para.cpp utils.cpp  ${PARALLEL}
+rainfall_pt: header.h
+	$(CC) $(CFLAGS) -o rainfall_pt rainFall_para.cpp utils.cpp  ${PARALLEL}
 
 .PHONY:
 	clean

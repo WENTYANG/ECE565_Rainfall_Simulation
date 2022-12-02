@@ -4,7 +4,7 @@ make clean
 make
 
 THREAD_NUM=0
-PROGRAM_NAME="rainFall_seq"
+PROGRAM_NAME="rainfall_seq"
 INPUT_FILE_PATH="./test_file"
 OUTPUT_FILE_PATH="./seq_output_file"
 VALIDATION_FILE_PATH="./test_file"
@@ -23,9 +23,9 @@ echo "running ./${PROGRAM_NAME} for different parameters"
 # ./${PROGRAM_NAME} ${THREAD_NUM} 50 0.5 4096 ${INPUT_FILE_PATH}/measurement_4096x4096.in >  ${OUTPUT_FILE_PATH}/measurement_4096x4096.out
 
 # used for single test
-# ./rainFall_seq 0 30 0.25 128 ./test_file/sample_128x128.in > ./output_file/sample_128x128.out
-# ./rainFall_seq 0 30 0.75 512 ./test_file/sample_512x512.in > ./output_file/sample_512x512.out
-# ./rainFall_seq 0 50 0.5 4096 ./test_file/measurement_4096x4096.in > ./output_file/measurement_4096x4096.out
+# ./rainfall_seq 0 30 0.25 128 ./test_file/sample_128x128.in > ./output_file/sample_128x128.out
+# ./rainfall_seq 0 30 0.75 512 ./test_file/sample_512x512.in > ./output_file/sample_512x512.out
+# ./rainfall_seq 0 50 0.5 4096 ./test_file/measurement_4096x4096.in > ./output_file/measurement_4096x4096.out
 
 
 echo "begin checing results"

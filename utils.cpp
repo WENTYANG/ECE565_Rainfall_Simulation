@@ -214,7 +214,6 @@ void absorb_and_calc_trickle_for_thread(
   done++;
   mtx.unlock();
   cv.notify_all();
-  cout << "calc trickle" << endl;
 }
 
 void calc_trickle_for_single_point(
