@@ -75,7 +75,6 @@ void rain_simulation(
                                      vector<float>(args.dimension, 0));
   while (1) {
     totalTimeStep++;
-
     vector<TrickleInfo>* trickleDrops[args.nThreads];
     for (int i = 0; i < args.nThreads; i++){
       trickleDrops[i] = new vector<TrickleInfo>();
