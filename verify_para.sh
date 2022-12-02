@@ -20,7 +20,7 @@ echo "running ./${PROGRAM_NAME} for different parameters"
 # ./${PROGRAM_NAME} ${THREAD_NUM} 30 0.25 128 ${INPUT_FILE_PATH}/sample_128x128.in >  ${OUTPUT_FILE_PATH}/sample_128x128.out 
 # ./${PROGRAM_NAME} ${THREAD_NUM} 30 0.75 512 ${INPUT_FILE_PATH}/sample_512x512.in >  ${OUTPUT_FILE_PATH}/sample_512x512.out 
 # ./${PROGRAM_NAME} ${THREAD_NUM} 35 0.5 2048 ${INPUT_FILE_PATH}/sample_2048x2048.in >  ${OUTPUT_FILE_PATH}/sample_2048x2048.out
-./${PROGRAM_NAME} ${THREAD_NUM} 50 0.5 4096 ${INPUT_FILE_PATH}/measurement_4096x4096.in >  ${OUTPUT_FILE_PATH}/measurement_4096x4096.out
+# ./${PROGRAM_NAME} ${THREAD_NUM} 50 0.5 4096 ${INPUT_FILE_PATH}/measurement_4096x4096.in >  ${OUTPUT_FILE_PATH}/measurement_4096x4096.out
 
 
 # used for single test

@@ -149,7 +149,7 @@ void find_lowest_neighbour_for_thread(
     int startIndex,
     int numPoints,
     const Arguments& args,
-    unordered_map<int, vector<pair<int, int>>>& lowestNeighbours) {
+    vector<vector<pair<int, int>>>& lowestNeighbours) {
   int row, col;
   vector<pair<int, int>> res;
   for (int p = startIndex; p < startIndex + numPoints; p++) {
@@ -158,9 +158,7 @@ void find_lowest_neighbour_for_thread(
     res.clear();
     find_lowest_neighbour(map, res, row, col, args);
     if (!res.empty()) {
-      mtx.lock();
-      lowestNeighbours[p] = res;
-      mtx.unlock();
+      lowestNeighbours[p]=res;
     }
   }
   done++;
@@ -187,7 +185,7 @@ void add_drop_for_thread(vector<vector<float>>& curRainDrops,
 void absorb_and_calc_trickle_for_thread(
     vector<vector<float>>& curRainDrops,
     vector<vector<float>>& absorbedRainDrop,
-    const unordered_map<int, vector<pair<int, int>>>& lowestNeighbours,
+    const vector<vector<pair<int, int>>>& lowestNeighbours,
     vector<TrickleInfo>*& trickleDrops,
     const int threadId,
     const int startIndex,
@@ -216,26 +214,28 @@ void absorb_and_calc_trickle_for_thread(
   done++;
   mtx.unlock();
   cv.notify_all();
+  cout << "calc trickle" << endl;
 }
 
 void calc_trickle_for_single_point(
     vector<vector<float>>& curRainDrops,
-    const unordered_map<int, vector<pair<int, int>>>& lowestNeighbours,
+    const vector<vector<pair<int, int>>>& lowestNeighbours,
     vector<TrickleInfo>*& trickleDrops,
     const int threadId,
     int row,
     int col,
     const Arguments& args) {
+  // cout << "trickle" << endl;
   float trickleAmount =
       curRainDrops[row][col] > 1 ? 1.0 : curRainDrops[row][col];
   int index = row * args.dimension + col;
-  if (lowestNeighbours.find(index) != lowestNeighbours.end()) {
+  if (!lowestNeighbours[index].empty()) {
     curRainDrops[row][col] -= trickleAmount;
-    for (auto& neigh : lowestNeighbours.find(index)->second) {
+    for (auto& neigh : lowestNeighbours[index]) {
       int neighRow = neigh.first;
       int neighCol = neigh.second;
       trickleDrops->push_back(TrickleInfo(
-          trickleAmount / lowestNeighbours.find(index)->second.size(), neighRow,
+          trickleAmount / lowestNeighbours[index].size(), neighRow,
           neighCol));
     }
   }

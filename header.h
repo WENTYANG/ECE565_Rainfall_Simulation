@@ -85,7 +85,7 @@ void find_lowest_neighbour_for_thread(
     int startIndex,
     int pointNum,
     const Arguments& args,
-    unordered_map<int, vector<pair<int, int>>>& lowestNeighbours);
+    vector<vector<pair<int, int>>>& lowestNeighbours);
 
 void add_drop_for_thread(vector<vector<float>>& curRainDrops,
                          const int startIndex,
@@ -104,7 +104,7 @@ typedef vector<TrickleInfo>& syncVecType;
 void absorb_and_calc_trickle_for_thread(
     vector<vector<float>>& curRainDrops,
     vector<vector<float>>& absorbedRainDrop,
-    const unordered_map<int, vector<pair<int, int>>>& lowestNeighbours,
+    const vector<vector<pair<int, int>>>& lowestNeighbours,
     syncVecType trickleDrops,
     const int threadId,
     const int startIndex,
@@ -113,7 +113,7 @@ void absorb_and_calc_trickle_for_thread(
 
 void calc_trickle_for_single_point(
     vector<vector<float>>& curRainDrops,
-    const unordered_map<int, vector<pair<int, int>>>& lowestNeighbours,
+    const vector<vector<pair<int, int>>>& lowestNeighbours,
     syncVecType trickleDrops,
     const int threadId,
     int row,

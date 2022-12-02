@@ -18,7 +18,7 @@ void barrier(const int nThreads) {
 
 void rain_simulation(
     const vector<vector<int>>& map,
-    unordered_map<int, vector<pair<int, int>>>& lowestNeighbours,
+    vector<vector<pair<int, int>>>& lowestNeighbours,
     vector<vector<float>>& absorbedRainDrop,
     const Arguments& args,
     int& totalTimeStep);
@@ -36,10 +36,10 @@ int main(int argc, char* argv[]) {
   auto start = chrono::system_clock::now();
 
   // calculate lowestNeighbours in parallel
-  unordered_map<int, vector<pair<int, int>>>
-      lowestNeighbours;  // record the lowest neighbours of each point
+  vector<vector<pair<int, int>>> lowestNeighbours;  // record the lowest neighbours of each point
   totalPoints = args.dimension * args.dimension;
   numPerTask = totalPoints / args.nThreads;
+  lowestNeighbours.resize(totalPoints);
 
 #ifdef SERIAL_NEIGHBOUR
   for (int p = 0; p < totalPoints; p++) {
@@ -81,7 +81,7 @@ int main(int argc, char* argv[]) {
 
 void rain_simulation(
     const vector<vector<int>>& map,
-    unordered_map<int, vector<pair<int, int>>>& lowestNeighbours,
+    vector<vector<pair<int, int>>>& lowestNeighbours,
     vector<vector<float>>& absorbedRainDrop,
     const Arguments& args,
     int& totalTimeStep) {
@@ -89,6 +89,7 @@ void rain_simulation(
                                      vector<float>(args.dimension, 0));
   while (1) {
     totalTimeStep++;
+    cout << totalTimeStep << endl;
 #ifdef SERIAL_CALC_TRICKLE
     vector<TrickleInfo> trickleDrops;
 #endif
@@ -194,6 +195,7 @@ void rain_simulation(
       for (auto& trickle : *trickleDrops[i]) {
         curRainDrops[trickle.r][trickle.c] += trickle.amount;
       }
+      delete trickleDrops[i];
     }
 #endif
 
